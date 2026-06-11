@@ -1,4 +1,4 @@
-# AI-Interview--Python
+# AI-Interview-Python
 
 ## Overview
 AI Emotion Analyzer is a Python-based application that analyzes text input and predicts emotions using Natural Language Processing (NLP) techniques.
