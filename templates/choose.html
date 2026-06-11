@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewAI - Choose Category</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080f1e; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.container { width: 100%; max-width: 620px; padding: 20px; }
+.back-btn { background: none; border: none; color: #64748b; font-size: 13px; cursor: pointer; margin-bottom: 28px; display: flex; align-items: center; gap: 6px; padding: 0; }
+.header { text-align: center; margin-bottom: 36px; }
+.header .icon { font-size: 44px; margin-bottom: 10px; }
+.header h1 { font-size: 28px; font-weight: 900; color: #f1f5f9; margin-bottom: 8px; }
+.header p { font-size: 13px; color: #64748b; }
+.round-info { background: #0d1726; border: 1px solid #1e2d45; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+.round-badge { text-align: center; }
+.round-badge .num { font-size: 22px; font-weight: 900; color: #6366f1; }
+.round-badge .label { font-size: 11px; color: #64748b; margin-top: 2px; }
+.divider { width: 1px; background: #1e2d45; }
+.categories { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.cat-btn { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #0d1726; border: 2px solid #1e2d45; border-radius: 14px; cursor: pointer; text-align: left; width: 100%; transition: all 0.2s; }
+.cat-btn:hover { transform: translateY(-1px); }
+.cat-btn.selected { border-color: var(--color); background: color-mix(in srgb, var(--color) 10%, transparent); }
+.cat-icon { font-size: 30px; }
+.cat-info { flex: 1; }
+.cat-name { font-size: 15px; font-weight: 800; color: #f1f5f9; margin-bottom: 2px; }
+.cat-btn.selected .cat-name { color: var(--color); }
+.cat-desc { font-size: 12px; color: #64748b; }
+.cat-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #1e2d45; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cat-btn.selected .cat-check { background: var(--color); border-color: var(--color); }
+.start-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(99,102,241,0.4); }
+.start-btn:hover { opacity: 0.9; }
+.info-text { text-align: center; font-size: 12px; color: #475569; margin-top: 10px; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #0d1726; border-bottom: 1px solid #1e2d45; position: fixed; top: 0; left: 0; right: 0; z-index: 10; }
+.nav-brand { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: #f1f5f9; }
+.nav-right { display: flex; gap: 10px; }
+.nav-btn { padding: 6px 14px; background: transparent; border: 1px solid #1e2d45; border-radius: 8px; color: #64748b; font-size: 12px; cursor: pointer; text-decoration: none; }
+.page-body { padding-top: 70px; }
+.resume-note { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(99,102,241,0.08)); border: 1px solid #244a4b; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+.resume-note strong { color: #f8fafc; }
+.resume-note p { font-size: 12px; color: #94a3b8; margin-top: 6px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-brand">InterviewAI</div>
+  <div class="nav-right">
+    <span style="font-size:13px;color:#94a3b8;">Hi, <strong style="color:#f1f5f9;">{{ name }}</strong></span>
+    <a href="/dashboard" class="nav-btn">Dashboard</a>
+    <a href="/logout" class="nav-btn">Logout</a>
+  </div>
+</nav>
+<div class="page-body">
+<div class="container">
+  <button class="back-btn" onclick="window.location.href='/dashboard'">&larr; Back to Dashboard</button>
+  {% if resume_profile %}
+  <div class="resume-note">
+    <strong>Resume-aware mode is active.</strong>
+    {% if resume_profile.skills %}
+    <p>Your interview can now include personalized questions based on {{ resume_profile.skills[:3] | join(', ') }}.</p>
+    {% else %}
+    <p>Your interview can now include personalized questions based on your uploaded resume.</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="resume-note">
+    <strong>Want a stronger demo?</strong>
+    <p>Upload your resume from the Resume Lab to unlock personalized project-based questions.</p>
+  </div>
+  {% endif %}
+  <div class="header">
+    <div class="icon">Target</div>
+    <h1>Choose Interview Type</h1>
+    <p>Complete 3 rounds per category. Score 60%+ in each round to advance.</p>
+  </div>
+  <div class="round-info">
+    <div class="round-badge">
+      <div class="num">Round 1</div>
+      <div class="label">Basic (10 Qs)</div>
+    </div>
+    <div class="divider"></div>
+    <div class="round-badge">
+      <div class="num">&rarr;</div>
+      <div class="label">Must Pass</div>
+    </div>
+    <div class="divider"></div>
+    <div class="round-badge">
+      <div class="num">Round 2</div>
+      <div class="label">Intermediate (10 Qs)</div>
+    </div>
+    <div class="divider"></div>
+    <div class="round-badge">
+      <div class="num">&rarr;</div>
+      <div class="label">Must Pass</div>
+    </div>
+    <div class="divider"></div>
+    <div class="round-badge">
+      <div class="num">Round 3</div>
+      <div class="label">Advanced (10 Qs)</div>
+    </div>
+  </div>
+  <div class="categories">
+    <button class="cat-btn selected" style="--color:#10b981" onclick="select(this,'hr')" data-cat="hr">
+      <span class="cat-icon">HR</span>
+      <div class="cat-info">
+        <div class="cat-name">HR Round</div>
+        <div class="cat-desc">Behavioural, culture fit, soft skills, situational questions</div>
+      </div>
+      <div class="cat-check"><span style="color:#fff;font-size:11px;font-weight:900;">&#10003;</span></div>
+    </button>
+    <button class="cat-btn" style="--color:#6366f1" onclick="select(this,'tech')" data-cat="tech">
+      <span class="cat-icon">Tech</span>
+      <div class="cat-info">
+        <div class="cat-name">Technical</div>
+        <div class="cat-desc">DSA, system design, programming concepts, databases</div>
+      </div>
+      <div class="cat-check"></div>
+    </button>
+    <button class="cat-btn" style="--color:#f59e0b" onclick="select(this,'data')" data-cat="data">
+      <span class="cat-icon">Data</span>
+      <div class="cat-info">
+        <div class="cat-name">Data Analytics</div>
+        <div class="cat-desc">SQL, statistics, machine learning, data thinking</div>
+      </div>
+      <div class="cat-check"></div>
+    </button>
+  </div>
+  <button class="start-btn" onclick="startInterview()">Start Interview &rarr;</button>
+  <p class="info-text">3 rounds · 10 questions each · 60% pass threshold · Camera required</p>
+</div>
+</div>
+<script>
+let selectedCat = 'hr';
+function select(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.querySelector('.cat-check').innerHTML = '';
+  });
+  btn.classList.add('selected');
+  btn.querySelector('.cat-check').innerHTML = '<span style="color:#fff;font-size:11px;font-weight:900;">&#10003;</span>';
+  selectedCat = cat;
+}
+function startInterview() {
+  window.location.href = '/interview?category=' + selectedCat;
+}
+</script>
+</body>
+</html>

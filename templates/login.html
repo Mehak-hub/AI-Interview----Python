@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewAI - Login</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080f1e; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; }
+.left { flex: 0 0 480px; background: linear-gradient(160deg, #0d1f3c, #0a1628); border-right: 1px solid #1e2d45; display: flex; align-items: center; justify-content: center; padding: 48px; }
+.left-inner { max-width: 380px; }
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+.brand-icon { font-size: 32px; }
+.brand-name { font-size: 20px; font-weight: 800; color: #f1f5f9; }
+.left h1 { font-size: 40px; font-weight: 900; color: #f1f5f9; line-height: 1.15; margin-bottom: 16px; }
+.grad { background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.left p { color: #64748b; line-height: 1.7; margin-bottom: 32px; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+.chip { display: flex; align-items: center; gap: 6px; background: #0f1f35; border: 1px solid #1e2d45; border-radius: 20px; padding: 6px 14px; font-size: 13px; color: #94a3b8; }
+.quote { background: #0f1f35; border-left: 3px solid #6366f1; border-radius: 0 8px 8px 0; padding: 14px 16px; }
+.quote p { font-style: italic; color: #94a3b8; font-size: 14px; margin-bottom: 6px; }
+.quote span { font-size: 12px; color: #475569; }
+.right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 32px; }
+.form-card { width: 100%; max-width: 420px; background: #0d1726; border-radius: 20px; padding: 36px; border: 1px solid #1e2d45; box-shadow: 0 24px 60px rgba(0,0,0,0.4); }
+.tabs { display: flex; background: #080f1e; border-radius: 10px; padding: 4px; margin-bottom: 28px; }
+.tab { flex: 1; padding: 10px; border: none; background: transparent; color: #64748b; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+.tab.active { background: #1e2d45; color: #f1f5f9; }
+.form-title { font-size: 24px; font-weight: 800; color: #f1f5f9; margin-bottom: 6px; }
+.form-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.field input { width: 100%; padding: 12px 14px; background: #080f1e; border: 1px solid #1e2d45; border-radius: 10px; color: #f1f5f9; font-size: 14px; outline: none; font-family: 'Segoe UI', sans-serif; transition: border 0.2s; }
+.field input:focus { border-color: #6366f1; }
+.error-box { background: #1c0505; border: 1px solid #ef4444; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #ef4444; margin-bottom: 16px; display: none; }
+.submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 16px; box-shadow: 0 6px 24px rgba(99,102,241,0.35); }
+.submit-btn:hover { opacity: 0.9; }
+.switch-text { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 16px; }
+.switch-link { color: #6366f1; cursor: pointer; font-weight: 700; }
+.demo-box { background: #0f1f35; border-radius: 8px; padding: 10px 14px; text-align: center; font-size: 12px; color: #475569; }
+#name-field { display: none; }
+@media (max-width: 768px) { .left { display: none; } }
+</style>
+</head>
+<body>
+<div class="left">
+  <div class="left-inner">
+    <div class="brand">
+      <span class="brand-icon">🧠</span>
+      <span class="brand-name">InterviewAI</span>
+    </div>
+    <h1>Your Personal<br><span class="grad">Interview Coach</span></h1>
+    <p>Practice interviews with real-time AI emotion analysis, voice recognition, multi-round gating, and detailed performance analytics.</p>
+    <div class="chips">
+      <div class="chip">🎯 AI Scoring</div>
+      <div class="chip">😊 Emotion AI</div>
+      <div class="chip">🎤 Voice Analysis</div>
+      <div class="chip">📊 Analytics</div>
+      <div class="chip">🏆 Multi-Round</div>
+    </div>
+    <div class="quote">
+      <p>"The secret of getting ahead is getting started."</p>
+      <span>— Mark Twain</span>
+    </div>
+  </div>
+</div>
+<div class="right">
+  <div class="form-card">
+    <div class="tabs">
+      <button class="tab active" onclick="setMode('login')">Login</button>
+      <button class="tab" onclick="setMode('signup')">Sign Up</button>
+    </div>
+    <h2 class="form-title" id="form-title">Welcome back 👋</h2>
+    <p class="form-sub" id="form-sub">Login to continue your interview practice</p>
+    <div class="field" id="name-field">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="e.g. Mehak Sharma">
+    </div>
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter') submit()">
+    </div>
+    <div class="error-box" id="error-box"></div>
+    <button class="submit-btn" id="submit-btn" onclick="submit()">🚀 Login & Start Practicing</button>
+    <p class="switch-text">
+      Don't have an account? <span class="switch-link" onclick="setMode('signup')">Sign Up</span>
+    </p>
+    <div class="demo-box">🎓 Demo — sign up with any email & password to try!</div>
+  </div>
+</div>
+<script>
+let mode = 'login';
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && m === 'login') || (i === 1 && m === 'signup')));
+  document.getElementById('name-field').style.display = m === 'signup' ? 'block' : 'none';
+  document.getElementById('form-title').textContent = m === 'login' ? 'Welcome back 👋' : 'Create your account ✨';
+  document.getElementById('form-sub').textContent = m === 'login' ? 'Login to continue your interview practice' : 'Start your AI-powered interview journey';
+  document.getElementById('submit-btn').textContent = m === 'login' ? '🚀 Login & Start Practicing' : '✨ Create Account';
+  document.querySelector('.switch-text').innerHTML = m === 'login' ? 'Don\'t have an account? <span class="switch-link" onclick="setMode(\'signup\')">Sign Up</span>' : 'Already have an account? <span class="switch-link" onclick="setMode(\'login\')">Login</span>';
+  document.getElementById('error-box').style.display = 'none';
+}
+async function submit() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const name = document.getElementById('name').value.trim();
+  const errBox = document.getElementById('error-box');
+  errBox.style.display = 'none';
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '⏳ Please wait...';
+  btn.disabled = true;
+  try {
+    const url = mode === 'login' ? '/login' : '/signup';
+    const body = mode === 'login' ? { email, password } : { name, email, password };
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      errBox.textContent = data.error;
+      errBox.style.display = 'block';
+    }
+  } catch(e) {
+    errBox.textContent = 'Something went wrong. Please try again.';
+    errBox.style.display = 'block';
+  }
+  btn.textContent = mode === 'login' ? '🚀 Login & Start Practicing' : '✨ Create Account';
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>

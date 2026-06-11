@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewAI - Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080f1e; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #0d1726; border-bottom: 1px solid #1e2d45; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 800; color: #f1f5f9; }
+.badge { font-size: 11px; background: #1e2d45; padding: 3px 10px; border-radius: 10px; color: #6366f1; font-weight: 700; }
+.nav-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.nav-btn { padding: 7px 12px; background: #1e2d45; border: 1px solid #334155; border-radius: 8px; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: none; }
+.nav-btn.primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); border: none; color: #fff; font-weight: 700; }
+.page { padding: 28px 32px; max-width: 1200px; margin: 0 auto; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 14px; margin-bottom: 24px; }
+.kpi { background: #0d1726; border-radius: 14px; padding: 16px 14px; border: 1px solid #1e2d45; }
+.kpi-val { font-size: 26px; font-weight: 900; line-height: 1; }
+.kpi-unit { font-size: 13px; color: #64748b; }
+.kpi-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+.empty { background: #0d1726; border-radius: 14px; padding: 80px 20px; border: 1px solid #1e2d45; text-align: center; }
+.empty-icon { font-size: 56px; margin-bottom: 16px; }
+.empty h2 { font-size: 22px; font-weight: 800; color: #f1f5f9; margin-bottom: 10px; }
+.empty p { font-size: 14px; color: #64748b; margin-bottom: 24px; }
+.start-btn { padding: 14px 32px; background: linear-gradient(135deg,#6366f1,#8b5cf6); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; text-decoration: none; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.card { background: #0d1726; border-radius: 14px; padding: 20px; border: 1px solid #1e2d45; }
+.card h3 { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+.card p { font-size: 11px; color: #475569; margin-bottom: 16px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.bar-label { width: 72px; font-size: 11px; color: #94a3b8; text-transform: capitalize; }
+.bar-bg { flex: 1; background: #080f1e; border-radius: 4px; height: 10px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+.bar-pct { width: 34px; font-size: 11px; color: #64748b; text-align: right; font-weight: 700; }
+.trend-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+.trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.trend-bar { width: 100%; border-radius: 4px 4px 0 0; }
+.trend-date { font-size: 8px; color: #475569; text-align: center; }
+.trend-score { font-size: 9px; color: #64748b; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 10px; color: #64748b; font-weight: 600; font-size: 11px; border-bottom: 1px solid #1e2d45; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 9px 10px; border-bottom: 1px solid #0f172a; }
+.verdict-badge { padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+.insights-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; }
+.insight { background: #080f1e; border-radius: 10px; padding: 14px; border: 1px solid #1e2d45; }
+.insight-label { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.insight-val { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+.resume-card { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(99,102,241,0.08)); border: 1px solid #244a4b; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+.resume-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.resume-title { font-size: 18px; font-weight: 800; color: #f1f5f9; }
+.resume-sub { font-size: 13px; color: #94a3b8; margin-top: 6px; }
+.resume-btn { padding: 10px 16px; border-radius: 10px; border: 1px solid #334155; background: #0d1726; color: #e2e8f0; text-decoration: none; font-size: 13px; font-weight: 700; }
+.resume-pill-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.resume-pill { padding: 6px 10px; border-radius: 999px; background: #08111f; border: 1px solid #1e2d45; color: #cbd5e1; font-size: 12px; }
+@media(max-width:768px) { .grid2 { grid-template-columns: 1fr; } .page { padding: 16px; } .nav { padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="brand">InterviewAI</div>
+    <span class="badge">Analytics Dashboard</span>
+  </div>
+  <div class="nav-right">
+    <span style="font-size:13px;color:#94a3b8">Hi, <strong style="color:#f1f5f9">{{ name }}</strong></span>
+    <button class="nav-btn" onclick="exportCSV()">CSV</button>
+    <button class="nav-btn" onclick="exportReport()">Report</button>
+    <a href="/resume" class="nav-btn">Resume Lab</a>
+    <a href="/choose" class="nav-btn primary">Start Interview</a>
+    <a href="/logout" class="nav-btn">Logout</a>
+  </div>
+</nav>
+<div class="page">
+  <div id="content"></div>
+</div>
+<script>
+const sessions = {{ sessions_json | safe }};
+const resumeProfile = {{ resume_profile_json | safe }};
+const hasSessions = sessions.length > 0;
+function sc(s) { return s >= 75 ? "#10b981" : s >= 50 ? "#f59e0b" : "#ef4444"; }
+function vl(v) { return v === "hired" ? "Ready" : v === "maybe" ? "Improving" : "Practice"; }
+function vc(v) { return v === "hired" ? "#10b981" : v === "maybe" ? "#f59e0b" : "#ef4444"; }
+function renderResumeCard() {
+  if (!resumeProfile) {
+    return `<div class="resume-card"><div class="resume-top"><div><div class="resume-title">Resume-Aware Interview Mode</div><div class="resume-sub">Upload your resume to unlock personalized project-based and skill-based questions during interviews.</div></div><a href="/resume" class="resume-btn">Upload Resume</a></div></div>`;
+  }
+  const skills = (resumeProfile.skills || []).slice(0, 6);
+  return `<div class="resume-card"><div class="resume-top"><div><div class="resume-title">Resume Profile Active</div><div class="resume-sub">Last analyzed on ${resumeProfile.uploaded_at || 'recently'}. Interviews can now include personalized questions from your resume.</div></div><a href="/resume" class="resume-btn">Manage Resume</a></div><div class="resume-pill-wrap">${skills.length ? skills.map(skill => `<span class="resume-pill">${skill}</span>`).join('') : '<span class="resume-pill">No skills extracted yet</span>'}</div></div>`;
+}
+if (!hasSessions) {
+  document.getElementById('content').innerHTML = `${renderResumeCard()}<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px">${[["0","","Total Sessions"],["0","/100","Average Score"],["0","/100","Best Score"],["0","%","Ready Rate"]].map(([v,u,l])=>`<div class="kpi"><div class="kpi-val" style="color:#475569">${v}<span class="kpi-unit">${u}</span></div><div class="kpi-label">${l}</div></div>`).join('')}</div><div class="empty"><div class="empty-icon">Analytics</div><h2>No Interview Data Yet</h2><p>Complete your first interview to see analytics and insights.</p><a href="/choose" class="start-btn">Start First Interview</a></div>`;
+} else {
+  const avgScore = Math.round(sessions.reduce((s,r)=>s+r.overall_score,0)/sessions.length);
+  const bestScore = Math.max(...sessions.map(s=>s.overall_score));
+  const worstScore = Math.min(...sessions.map(s=>s.overall_score));
+  const readyPct = Math.round(sessions.filter(s=>s.verdict==="hired").length/sessions.length*100);
+  const avgRounds = (sessions.reduce((s,r)=>s+(r.rounds_completed||0),0)/sessions.length).toFixed(1);
+  const emotionFreq = {};
+  sessions.forEach(s => (s.question_results||[]).forEach(q => { if (q.emotion) emotionFreq[q.emotion] = (emotionFreq[q.emotion]||0) + 1; }));
+  const totalEmo = Object.values(emotionFreq).reduce((a,b)=>a+b,0) || 1;
+  const emoColors = { happy:"#10b981", neutral:"#6366f1", surprised:"#f59e0b", sad:"#60a5fa", fearful:"#fb923c", disgusted:"#a78bfa", angry:"#ef4444" };
+  const catFreq = {};
+  sessions.forEach(s => { const c = s.category || "hr"; if (!catFreq[c]) catFreq[c] = { count:0, total:0 }; catFreq[c].count++; catFreq[c].total += s.overall_score; });
+  const trend = [...sessions].reverse().slice(-8);
+  const scores = sessions.map(s=>s.overall_score);
+  const mean = scores.reduce((a,b)=>a+b,0)/scores.length;
+  const stdDev = Math.round(Math.sqrt(scores.reduce((a,b)=>a+Math.pow(b-mean,2),0)/scores.length));
+  const consistency = stdDev <= 10 ? `Very consistent (std dev: ${stdDev})` : stdDev <= 20 ? `Moderately consistent (std dev: ${stdDev})` : `Variable performance (std dev: ${stdDev})`;
+  const progTrend = sessions.length >= 2 ? (() => { const diff = sessions[0].overall_score - sessions[1].overall_score; return diff > 0 ? `Improving. Last score +${diff} from previous` : diff < 0 ? `Declining. Last score ${diff} from previous` : "Stable. Same as previous"; })() : "Complete 2+ interviews to track";
+  document.getElementById('content').innerHTML = `${renderResumeCard()}<div class="kpi-grid">${[["Total Sessions",sessions.length,"","#6366f1"],["Average Score",avgScore,"/100",sc(avgScore)],["Best Score",bestScore,"/100","#10b981"],["Avg Rounds Done",avgRounds,"/3","#8b5cf6"],["Ready Rate",readyPct,"%","#10b981"]].map(([l,v,u,c])=>`<div class="kpi"><div class="kpi-val" style="color:${c}">${v}<span class="kpi-unit">${u}</span></div><div class="kpi-label">${l}</div></div>`).join('')}</div><div class="grid2"><div class="card"><h3>Score Trend</h3><p>Your last ${trend.length} sessions</p><div class="trend-bars">${trend.map(s=>{const h=Math.max(8,(s.overall_score/100)*120);return `<div class="trend-bar-wrap"><div class="trend-score">${s.overall_score}</div><div class="trend-bar" style="height:${h}px;background:${sc(s.overall_score)}"></div><div class="trend-date">${(s.date||"").split(" ").slice(0,2).join(" ")}</div></div>`;}).join('')}</div></div><div class="card"><h3>Emotion Distribution</h3><p>How you feel across all interviews</p>${Object.entries(emotionFreq).sort((a,b)=>b[1]-a[1]).map(([em,cnt])=>{const pct=Math.round(cnt/totalEmo*100);return `<div class="bar-row"><span class="bar-label">${em}</span><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${emoColors[em]||"#6366f1"}"></div></div><span class="bar-pct">${pct}%</span></div>`;}).join('') || '<div style="color:#64748b;font-size:12px">No emotion data yet</div>'}</div></div><div class="grid2"><div class="card"><h3>Score Breakdown</h3><p>Average performance metrics</p>${[["Overall Score",avgScore,sc(avgScore)],["Best Score",bestScore,"#10b981"],["Worst Score",worstScore,sc(worstScore)]].map(([l,v,c])=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;color:#94a3b8">${l}</span><span style="font-size:13px;font-weight:800;color:${c}">${v}/100</span></div><div style="background:#080f1e;border-radius:6px;height:12px;overflow:hidden"><div style="width:${v}%;height:100%;background:${c};border-radius:6px"></div></div></div>`).join('')}</div><div class="card"><h3>Category Performance</h3><p>Your average per interview type</p>${Object.entries(catFreq).map(([cat,d])=>{const avg=Math.round(d.total/d.count);const color=cat==="hr"?"#10b981":cat==="tech"?"#6366f1":"#f59e0b";return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;color:#94a3b8">${cat.toUpperCase()}</span><span style="font-size:12px;color:#64748b">${d.count} session${d.count>1?"s":""} · <strong style="color:${color}">${avg}/100</strong></span></div><div style="background:#080f1e;border-radius:6px;height:10px;overflow:hidden"><div style="width:${avg}%;height:100%;background:${color};border-radius:6px"></div></div></div>`;}).join('')}</div></div><div class="card" style="margin-bottom:18px"><h3>Session History</h3><p>All your interview sessions</p><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Date</th><th>Category</th><th>Score</th><th>Rounds</th><th>Verdict</th><th>Status</th></tr></thead><tbody>${sessions.map((s,i)=>`<tr><td style="color:#475569">${sessions.length-i}</td><td style="color:#94a3b8">${s.date}</td><td style="color:#64748b;font-size:12px">${s.category.toUpperCase()}</td><td><strong style="color:${sc(s.overall_score)}">${s.overall_score}/100</strong></td><td style="color:#94a3b8">${s.rounds_completed||0}/3</td><td><span class="verdict-badge" style="color:${vc(s.verdict)};background:${vc(s.verdict)}22">${vl(s.verdict)}</span></td><td style="font-size:12px;color:${s.eliminated_at?"#ef4444":"#10b981"}">${s.eliminated_at?"Eliminated R"+s.eliminated_at:"Completed"}</td></tr>`).join('')}</tbody></table></div></div><div class="card"><h3>Data-Driven Insights</h3><p>Automatically calculated from your interview data</p><div class="insights-grid">${[["Progress Trend","#f59e0b",progTrend],["Consistency","#6366f1",consistency],["Top Emotion","#10b981",Object.entries(emotionFreq).length?`${Object.entries(emotionFreq).sort((a,b)=>b[1]-a[1])[0][0]} (${Math.round(Object.entries(emotionFreq).sort((a,b)=>b[1]-a[1])[0][1]/totalEmo*100)}% of time)`:"No data yet"],["Prediction","#8b5cf6",sessions.length>=3?(avgScore>=75?"You are interview-ready":`${Math.ceil((75-avgScore)/5)} more focused sessions may help`):"Complete 3+ interviews"]].map(([l,c,v])=>`<div class="insight"><div class="insight-label" style="color:${c}">${l}</div><div class="insight-val">${v}</div></div>`).join('')}</div></div>`;
+}
+function exportCSV() {
+  const rows = [["Date","Category","Score","Rounds","Verdict","Eliminated At"], ...sessions.map(s=>[s.date,s.category,s.overall_score,s.rounds_completed||0,s.verdict,s.eliminated_at||"N/A"])];
+  const csv = rows.map(r=>r.join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "interview_data.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function exportReport() {
+  const avgScore = sessions.length ? Math.round(sessions.reduce((s,r)=>s+r.overall_score,0)/sessions.length) : 0;
+  const lines = ["INTERVIEWAI PERFORMANCE REPORT","Generated: "+new Date().toLocaleDateString("en-IN"),"","=== OVERVIEW ===","Total Sessions: "+sessions.length,"Average Score: "+avgScore+"/100","","=== SESSION HISTORY ===",...sessions.map((s,i)=>"Session "+(i+1)+" | "+s.date+" | "+s.category+" | Score: "+s.overall_score+"/100 | "+s.verdict.toUpperCase()+" | Rounds: "+(s.rounds_completed||0)+"/3")];
+  const blob = new Blob([lines.join("\n")], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "interview_report.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

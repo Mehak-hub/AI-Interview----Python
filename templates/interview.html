@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewAI - Interview</title>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080f1e; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 13px 24px; background: #0d1726; border-bottom: 1px solid #1e2d45; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; gap: 10px; }
+.topbar-left { display: flex; align-items: center; gap: 8px; }
+.brand { font-size: 16px; font-weight: 800; color: #f1f5f9; }
+.cat-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+.round-badge { font-size: 12px; padding: 3px 12px; border-radius: 10px; font-weight: 700; background: #1e2d45; color: #94a3b8; }
+.progress-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; margin: 0 20px; }
+.progress-track { width: 100%; max-width: 360px; height: 6px; background: #1e2d45; border-radius: 6px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+.progress-label { font-size: 11px; color: #64748b; }
+.timer-chip { border: 1.5px solid; border-radius: 20px; padding: 5px 14px; font-size: 14px; font-weight: 700; min-width: 60px; text-align: center; }
+.main { display: flex; gap: 18px; padding: 18px 20px; flex-wrap: wrap; }
+.left-panel { flex: 0 0 320px; display: flex; flex-direction: column; gap: 12px; }
+.camera-box { position: relative; border-radius: 14px; overflow: hidden; box-shadow: 0 0 40px rgba(99,102,241,0.2); }
+.camera-box video { width: 100%; display: block; transform: scaleX(-1); }
+.emotion-chip { position: absolute; bottom: 12px; left: 12px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: #fff; }
+.timer-bar { height: 4px; transition: background 0.5s; }
+.card { background: #0d1726; border-radius: 12px; padding: 14px; border: 1px solid #1e2d45; }
+.conf-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+.conf-bar { background: #080f1e; border-radius: 8px; height: 10px; overflow: hidden; margin-bottom: 8px; }
+.conf-fill { height: 100%; border-radius: 8px; transition: width 0.5s; }
+.conf-tip { font-size: 12px; color: #64748b; margin: 0; }
+.emo-title { font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; }
+.emo-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.emo-label { width: 80px; font-size: 11px; text-transform: capitalize; }
+.emo-bar { flex: 1; background: #080f1e; border-radius: 4px; height: 6px; overflow: hidden; }
+.emo-fill { height: 100%; border-radius: 4px; }
+.emo-pct { width: 30px; font-size: 11px; color: #64748b; text-align: right; }
+.right-panel { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 280px; }
+.q-card { background: #0d1726; border-radius: 14px; padding: 22px; border: 1px solid #1e2d45; }
+.q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.q-num { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.read-btn { background: #1e2d45; border: none; border-radius: 8px; padding: 6px 14px; color: #94a3b8; cursor: pointer; font-size: 13px; }
+.q-text { font-size: 20px; font-weight: 700; margin: 0 0 14px; color: #f1f5f9; line-height: 1.5; }
+.q-tip { font-size: 12px; color: #475569; border-top: 1px solid #1e2d45; padding-top: 12px; }
+.ans-card { background: #0d1726; border-radius: 14px; padding: 18px; border: 1px solid #1e2d45; }
+.ans-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.ans-title { font-size: 14px; font-weight: 700; color: #f1f5f9; }
+.mic-btn { border: none; border-radius: 8px; padding: 8px 18px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 700; }
+.listening { font-size: 12px; color: #ef4444; margin-bottom: 8px; }
+.transcript-box { min-height: 80px; background: #080f1e; border-radius: 10px; padding: 14px; font-size: 14px; color: #e2e8f0; line-height: 1.7; }
+.next-btn { padding: 15px; background: linear-gradient(135deg,#6366f1,#8b5cf6); border: none; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(99,102,241,0.35); }
+.next-btn.last { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+.next-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Round transition overlay */
+.overlay { position: fixed; inset: 0; background: rgba(8,15,30,0.96); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; gap: 20px; text-align: center; padding: 20px; }
+.overlay.show { display: flex; }
+.overlay-icon { font-size: 64px; }
+.overlay-title { font-size: 32px; font-weight: 900; }
+.overlay-sub { font-size: 16px; color: #94a3b8; max-width: 400px; line-height: 1.6; }
+.overlay-score { font-size: 48px; font-weight: 900; }
+.overlay-btn { padding: 14px 32px; border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+
+/* Q tracker dots */
+.q-tracker { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.q-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; border: 2px solid #1e2d45; color: #475569; background: #0d1726; }
+.q-dot.current { border-color: #6366f1; color: #6366f1; }
+.q-dot.passed { border-color: #10b981; background: #10b981; color: #fff; }
+.q-dot.failed { border-color: #ef4444; background: #ef4444; color: #fff; }
+.resume-banner { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(99,102,241,0.08)); border: 1px solid #244a4b; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.resume-banner-title { font-size: 13px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; }
+.resume-banner-sub { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- Round Transition Overlay -->
+<div class="overlay" id="overlay">
+  <div class="overlay-icon" id="overlay-icon">⏳</div>
+  <div class="overlay-title" id="overlay-title">Processing...</div>
+  <div class="overlay-score" id="overlay-score"></div>
+  <div class="overlay-sub" id="overlay-sub"></div>
+  <button class="overlay-btn" id="overlay-btn" onclick="handleOverlayAction()" style="display:none;background:linear-gradient(135deg,#6366f1,#8b5cf6)">Continue</button>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="brand">🧠 InterviewAI</span>
+    <span class="cat-badge" id="cat-badge">HR</span>
+    <span class="round-badge" id="round-badge">Round 1 of 3</span>
+    <span style="font-size:12px;color:#475569">· {{ name }}</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <span class="progress-label" id="progress-label">Question 1 of 10</span>
+  </div>
+  <div class="timer-chip" id="timer-chip" style="color:#10b981;border-color:#10b981">60s</div>
+</div>
+
+<div class="main">
+  <div class="left-panel">
+    <div class="camera-box">
+      <video id="video" autoplay muted playsinline></video>
+      <div class="emotion-chip" id="emotion-chip" style="background:#6366f1">😐 neutral</div>
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+    <div class="card">
+      <div class="conf-header">
+        <span style="color:#94a3b8">Confidence</span>
+        <span id="conf-pct" style="font-size:15px;font-weight:800;color:#6366f1">0%</span>
+      </div>
+      <div class="conf-bar">
+        <div class="conf-fill" id="conf-fill" style="width:0%;background:#6366f1"></div>
+      </div>
+      <p class="conf-tip" id="conf-tip">Loading AI models...</p>
+    </div>
+    <div class="card">
+      <div class="emo-title">Live Emotion Analysis</div>
+      <div id="emo-bars"></div>
+    </div>
+    <div class="card">
+      <div class="emo-title">Question Tracker</div>
+      <div class="q-tracker" id="q-tracker"></div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="resume-banner" id="resume-banner" style="display:none">
+      <div class="resume-banner-title">Resume-based personalization is active</div>
+      <div class="resume-banner-sub" id="resume-banner-sub"></div>
+    </div>
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="q-num" id="q-num" style="background:#1e2d45;color:#6366f1">Question 1</span>
+        <button class="read-btn" onclick="speak(currentQuestion)">🔊 Read Aloud</button>
+      </div>
+      <p class="q-text" id="q-text">Loading question...</p>
+      <div class="q-tip">Be specific. Use real examples from your experience.</div>
+    </div>
+
+    <div class="ans-card">
+      <div class="ans-header">
+        <span class="ans-title">🎤 Your Answer</span>
+        <button class="mic-btn" id="mic-btn" onclick="toggleMic()" style="background:#6366f1">Start Recording</button>
+      </div>
+      <div class="listening" id="listening" style="display:none">🔴 Listening...</div>
+      <div class="transcript-box" id="transcript">
+        <span style="color:#475569">Start recording to see your answer here...</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="emo-title">STAR Answer Framework</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div style="background:#080f1e;border-radius:8px;padding:10px 8px;text-align:center;border-top:3px solid #6366f1">
+          <span style="font-size:20px;font-weight:900;color:#6366f1;display:block">S</span>
+          <span style="font-size:11px;color:#64748b">Situation</span>
+        </div>
+        <div style="background:#080f1e;border-radius:8px;padding:10px 8px;text-align:center;border-top:3px solid #f59e0b">
+          <span style="font-size:20px;font-weight:900;color:#f59e0b;display:block">T</span>
+          <span style="font-size:11px;color:#64748b">Task</span>
+        </div>
+        <div style="background:#080f1e;border-radius:8px;padding:10px 8px;text-align:center;border-top:3px solid #10b981">
+          <span style="font-size:20px;font-weight:900;color:#10b981;display:block">A</span>
+          <span style="font-size:11px;color:#64748b">Action</span>
+        </div>
+        <div style="background:#080f1e;border-radius:8px;padding:10px 8px;text-align:center;border-top:3px solid #ec4899">
+          <span style="font-size:20px;font-weight:900;color:#ec4899;display:block">R</span>
+          <span style="font-size:11px;color:#64748b">Result</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="saveAndNext()">Save & Next Question →</button>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────
+const CATEGORY = "{{ request.args.get('category', 'hr') }}";
+const CAT_META = {
+  hr: { label: "HR Round", color: "#10b981", emoji: "🤝" },
+  tech: { label: "Technical", color: "#6366f1", emoji: "💻" },
+  data: { label: "Data/Analytics", color: "#f59e0b", emoji: "📊" }
+};
+const EMOTION_META = {
+  happy: { color: "#10b981", score: 100, tip: "Excellent! You look confident and warm." },
+  neutral: { color: "#6366f1", score: 75, tip: "Good composure. Try smiling slightly more." },
+  surprised: { color: "#f59e0b", score: 55, tip: "Stay composed, avoid showing shock." },
+  sad: { color: "#60a5fa", score: 40, tip: "Lift your energy, take a deep breath!" },
+  fearful: { color: "#fb923c", score: 35, tip: "You seem nervous. Relax your shoulders." },
+  disgusted: { color: "#a78bfa", score: 30, tip: "Keep a neutral or positive expression." },
+  angry: { color: "#ef4444", score: 20, tip: "Relax your face, you may seem aggressive." }
+};
+
+let currentRound = 1;
+let currentQIndex = 0;
+let questions = [];
+let allResults = [];
+let roundResults = [];
+let roundScores = [];
+let questionsPerRound = 10;
+let totalRounds = 3;
+let timer = 60;
+let timerInterval = null;
+let isListening = false;
+let isSaving = false;
+let transcript = "";
+let currentEmotion = "neutral";
+let currentConfidence = 0;
+let recognition = null;
+let overlayAction = null;
+let currentQuestion = "";
+let currentKeywords = [];
+const RESUME_PROFILE = {{ resume_profile_json | safe }};
+let resumePersonalized = false;
+
+// ── Init ─────────────────────────────────────────────────────
+const cm = CAT_META[CATEGORY];
+document.getElementById('cat-badge').textContent = cm.emoji + " " + cm.label;
+document.getElementById('cat-badge').style.cssText = `color:${cm.color};background:${cm.color}18;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700`;
+if (RESUME_PROFILE) {
+  document.getElementById('resume-banner').style.display = 'block';
+  const skills = (RESUME_PROFILE.skills || []).slice(0, 3).join(', ');
+  document.getElementById('resume-banner-sub').textContent = skills
+    ? `Some questions may reference your resume skills or projects, such as ${skills}.`
+    : 'Some questions may reference your uploaded resume.';
+}
+
+window.addEventListener('load', async () => {
+  await startCamera();
+  await loadFaceModels();
+  setupMic();
+  await loadQuestions();
+});
+
+// ── Camera & Face ────────────────────────────────────────────
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('video').srcObject = stream;
+  } catch(e) { console.error("Camera error", e); }
+}
+
+async function loadFaceModels() {
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+    await faceapi.nets.faceExpressionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+    document.getElementById('conf-tip').textContent = "AI models loaded. Camera active.";
+    startDetection();
+  } catch(e) {
+    document.getElementById('conf-tip').textContent = "Emotion detection unavailable.";
+  }
+}
+
+function startDetection() {
+  setInterval(async () => {
+    const video = document.getElementById('video');
+    if (!video || !video.srcObject) return;
+    try {
+      const d = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+      if (d.length > 0) {
+        const exp = d[0].expressions;
+        const top = Object.keys(exp).reduce((a, b) => exp[a] > exp[b] ? a : b);
+        currentEmotion = top;
+        currentConfidence = Math.round(exp[top] * 100);
+        updateEmotionUI(exp, top);
+      }
+    } catch(e) {}
+  }, 1200);
+}
+
+function updateEmotionUI(exp, top) {
+  const meta = EMOTION_META[top] || EMOTION_META.neutral;
+  document.getElementById('emotion-chip').textContent = top;
+  document.getElementById('emotion-chip').style.background = meta.color;
+  document.getElementById('conf-pct').textContent = currentConfidence + "%";
+  document.getElementById('conf-pct').style.color = meta.color;
+  document.getElementById('conf-fill').style.width = currentConfidence + "%";
+  document.getElementById('conf-fill').style.background = meta.color;
+  document.getElementById('conf-tip').textContent = meta.tip;
+  const barsHtml = Object.entries(exp).sort((a,b) => b[1]-a[1]).map(([em, val]) => {
+    const m = EMOTION_META[em] || EMOTION_META.neutral;
+    const pct = Math.round(val * 100);
+    return `<div class="emo-row">
+      <span class="emo-label">${em}</span>
+      <div class="emo-bar"><div class="emo-fill" style="width:${pct}%;background:${m.color}"></div></div>
+      <span class="emo-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+  document.getElementById('emo-bars').innerHTML = barsHtml;
+}
+
+// ── Mic ──────────────────────────────────────────────────────
+function setupMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.lang = "en-US";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onresult = (e) => {
+    let t = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    transcript = t;
+    document.getElementById('transcript').textContent = t || "";
+  };
+  recognition.onend = () => { isListening = false; updateMicBtn(); };
+}
+
+function toggleMic() {
+  if (!recognition) { alert("Speech recognition not supported."); return; }
+  if (isListening) { recognition.stop(); isListening = false; }
+  else { transcript = ""; document.getElementById('transcript').innerHTML = '<span style="color:#475569">Listening...</span>'; recognition.start(); isListening = true; }
+  updateMicBtn();
+}
+
+function updateMicBtn() {
+  const btn = document.getElementById('mic-btn');
+  btn.textContent = isListening ? "⏹ Stop Recording" : "🎤 Start Recording";
+  btn.style.background = isListening ? "#ef4444" : "#6366f1";
+  document.getElementById('listening').style.display = isListening ? 'block' : 'none';
+}
+
+function speak(text) {
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.92; u.pitch = 1.05;
+  window.speechSynthesis.speak(u);
+}
+
+// ── Timer ────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerInterval);
+  timer = 60;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timer--;
+    updateTimerUI();
+    if (timer <= 0) { clearInterval(timerInterval); if (!isSaving) saveAndNext(); }
+  }, 1000);
+}
+
+function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+
+function updateTimerUI() {
+  const color = timer > 30 ? "#10b981" : timer > 10 ? "#f59e0b" : "#ef4444";
+  const chip = document.getElementById('timer-chip');
+  chip.textContent = timer + "s";
+  chip.style.color = color;
+  chip.style.borderColor = color;
+  const pct = (timer / 60) * 100;
+  document.getElementById('timer-bar').style.background = `linear-gradient(90deg, ${color} ${pct}%, #1e293b ${pct}%)`;
+}
+
+// ── Questions ────────────────────────────────────────────────
+async function loadQuestions() {
+  showOverlay("⏳", "Loading Round " + currentRound, "", "Getting questions ready...");
+  try {
+    const res = await fetch('/api/get_questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category: CATEGORY, round: currentRound })
+    });
+    const data = await res.json();
+    questions = data.questions;
+    questionsPerRound = data.questions_per_round || 10;
+    totalRounds = data.total_rounds || 3;
+    resumePersonalized = !!data.resume_personalized;
+    if (RESUME_PROFILE) {
+      const skills = (RESUME_PROFILE.skills || []).slice(0, 3).join(', ');
+      document.getElementById('resume-banner-sub').textContent = skills
+        ? `Some questions may reference your resume skills or projects, such as ${skills}.`
+        : 'Some questions may reference your uploaded resume.';
+      if (resumePersonalized) {
+        document.getElementById('resume-banner-sub').textContent += ' This round includes personalized resume-based questions.';
+      }
+    }
+    currentQIndex = 0;
+    roundResults = [];
+    hideOverlay();
+    updateRoundBadge();
+    renderQuestion();
+    renderTracker();
+    startTimer();
+  } catch(e) {
+    showOverlay("❌", "Error", "", "Failed to load questions. Please refresh.");
+  }
+}
+
+function updateRoundBadge() {
+  document.getElementById('round-badge').textContent = "Round " + currentRound + " of " + totalRounds;
+  const pf = document.getElementById('progress-fill');
+  pf.style.background = `linear-gradient(90deg, ${cm.color}, ${cm.color}99)`;
+}
+
+function renderQuestion() {
+  if (currentQIndex >= questions.length) return;
+  const q = questions[currentQIndex];
+  currentQuestion = q.question;
+  currentKeywords = q.keywords;
+  document.getElementById('q-text').textContent = '"' + q.question + '"';
+  document.getElementById('q-num').textContent = "Question " + (currentQIndex + 1);
+  document.getElementById('q-num').style.color = cm.color;
+  document.getElementById('q-num').style.background = cm.color + "22";
+  document.getElementById('transcript').innerHTML = '<span style="color:#475569">Start recording to see your answer here...</span>';
+  transcript = "";
+  const isLast = currentQIndex === questions.length - 1;
+  const btn = document.getElementById('next-btn');
+  btn.disabled = false;
+  btn.textContent = isLast ? "Finish Round & See Score →" : "Save & Next Question →";
+  btn.className = "next-btn" + (isLast ? " last" : "");
+  updateProgress();
+  renderTracker();
+  speak(q.question);
+}
+
+function updateProgress() {
+  const pct = (currentQIndex / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + "%";
+  document.getElementById('progress-label').textContent = "Question " + (currentQIndex + 1) + " of " + questions.length;
+}
+
+function renderTracker() {
+  const html = questions.map((_, i) => {
+    let cls = "q-dot";
+    if (i < roundResults.length) {
+      cls += roundResults[i].passed ? " passed" : " failed";
+    } else if (i === currentQIndex) {
+      cls += " current";
+    }
+    const symbol = i < roundResults.length ? (roundResults[i].passed ? "✓" : "✗") : (i + 1);
+    return `<div class="${cls}">${symbol}</div>`;
+  }).join('');
+  document.getElementById('q-tracker').innerHTML = html;
+}
+
+// ── Save & Score ─────────────────────────────────────────────
+async function saveAndNext() {
+  if (isSaving) return;
+  isSaving = true;
+  stopTimer();
+  if (isListening) { recognition.stop(); isListening = false; updateMicBtn(); }
+  document.getElementById('next-btn').textContent = "⏳ Scoring...";
+  document.getElementById('next-btn').disabled = true;
+
+  try {
+    const res = await fetch('/api/score_answer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer: transcript, keywords: currentKeywords, question: currentQuestion })
+    });
+    const scoreData = await res.json();
+
+    roundResults.push({
+      question: currentQuestion,
+      answer: transcript,
+      score: scoreData.score,
+      passed: scoreData.passed,
+      feedback: scoreData.feedback,
+      emotion: currentEmotion,
+      confidence: currentConfidence,
+      round: currentRound
+    });
+
+    allResults.push(...roundResults.slice(-1));
+    renderTracker();
+
+    if (currentQIndex < questions.length - 1) {
+      currentQIndex++;
+      renderQuestion();
+      isSaving = false;
+      document.getElementById('next-btn').disabled = false;
+      startTimer();
+    } else {
+      finishRound();
+    }
+  } catch(e) {
+    isSaving = false;
+    document.getElementById('next-btn').disabled = false;
+    document.getElementById('next-btn').textContent = "Save & Next Question →";
+    startTimer();
+  }
+}
+
+// ── Round Finish ─────────────────────────────────────────────
+function finishRound() {
+  const avgScore = Math.round(roundResults.reduce((s, r) => s + r.score, 0) / roundResults.length);
+  const passed = avgScore >= 60;
+  document.getElementById('next-btn').disabled = false;
+  document.getElementById('next-btn').disabled = false;
+  roundScores.push({ round: currentRound, score: avgScore, passed });
+
+  if (!passed) {
+    // ELIMINATED
+    showOverlay(
+      "❌",
+      "Eliminated! Round " + currentRound + " Failed",
+      avgScore + "/100",
+      "You needed 60% to advance. Your average was " + avgScore + "%. Better luck next time!",
+      "See Full Results",
+      () => saveAndShowResults(false)
+    );
+  } else if (currentRound === totalRounds) {
+    // COMPLETED ALL ROUNDS
+    showOverlay(
+      "🏆",
+      "All Rounds Completed!",
+      avgScore + "/100",
+      "Amazing! You completed all " + totalRounds + " rounds. Let's see your detailed results!",
+      "See Full Results",
+      () => saveAndShowResults(true)
+    );
+  } else {
+    // ADVANCE TO NEXT ROUND
+    showOverlay(
+      "✅",
+      "Round " + currentRound + " Passed!",
+      avgScore + "/100",
+      "Great job! You scored " + avgScore + "% and qualified for Round " + (currentRound + 1) + ". Ready to continue?",
+      "Start Round " + (currentRound + 1),
+      () => { currentRound++; hideOverlay(); loadQuestions(); isSaving = false; }
+    );
+  }
+}
+
+async function saveAndShowResults(completed) {
+  const overallScore = roundScores.length > 0 ? Math.round(roundScores.reduce((s, r) => s + r.score, 0) / roundScores.length) : 0;
+  const verdict = overallScore >= 75 ? "hired" : overallScore >= 50 ? "maybe" : "practice";
+  const sessionData = {
+    category: CATEGORY,
+    rounds_completed: currentRound - (completed ? 0 : 1),
+    overall_score: overallScore,
+    round_scores: roundScores,
+    question_results: allResults,
+    verdict,
+    eliminated_at: completed ? null : currentRound
+  };
+  sessionStorage.setItem('interviewResult', JSON.stringify(sessionData));
+  await fetch('/api/save_session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(sessionData)
+  });
+  window.location.href = '/result';
+}
+
+// ── Overlay ───────────────────────────────────────────────────
+function showOverlay(icon, title, score, sub, btnText, action) {
+  document.getElementById('overlay-icon').textContent = icon;
+  document.getElementById('overlay-title').textContent = title;
+  document.getElementById('overlay-score').textContent = score;
+  document.getElementById('overlay-sub').textContent = sub;
+  const btn = document.getElementById('overlay-btn');
+  if (btnText && action) {
+    btn.textContent = btnText;
+    btn.style.display = 'inline-block';
+    overlayAction = action;
+  } else {
+    btn.style.display = 'none';
+    overlayAction = null;
+  }
+  const titleEl = document.getElementById('overlay-title');
+  if (title.includes("Failed") || title.includes("Eliminated")) titleEl.style.color = "#ef4444";
+  else if (title.includes("Passed") || title.includes("Completed")) titleEl.style.color = "#10b981";
+  else titleEl.style.color = "#f59e0b";
+  document.getElementById('overlay').classList.add('show');
+}
+
+function hideOverlay() { document.getElementById('overlay').classList.remove('show'); }
+function handleOverlayAction() { if (overlayAction) overlayAction(); }
+</script>
+</body>
+</html>

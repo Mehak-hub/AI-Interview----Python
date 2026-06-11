@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewAI - Results</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #080f1e; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #0d1726; border-bottom: 1px solid #1e2d45; }
+.brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 800; color: #f1f5f9; }
+.nav-right { display: flex; gap: 10px; }
+.nav-btn { padding: 7px 16px; border: 1px solid #1e2d45; border-radius: 8px; color: #64748b; font-size: 13px; cursor: pointer; background: transparent; text-decoration: none; font-weight: 600; }
+.nav-btn.primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); border: none; color: #fff; }
+.page { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+.accuracy-section { background: #0d1726; border-radius: 16px; padding: 28px; border: 1px solid #1e2d45; margin-bottom: 24px; text-align: center; }
+.accuracy-label { font-size: 13px; color: #94a3b8; margin-bottom: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.accuracy-bar-wrap { position: relative; height: 48px; border-radius: 24px; overflow: hidden; margin-bottom: 12px; }
+.accuracy-bar-bg { position: absolute; inset: 0; background: #ef4444; border-radius: 24px; }
+.accuracy-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: #10b981; border-radius: 24px; transition: width 1s ease; }
+.accuracy-marker { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: #080f1e; box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: left 1s ease; }
+.accuracy-scale { display: flex; justify-content: space-between; font-size: 11px; color: #475569; padding: 0 4px; }
+.accuracy-msg { font-size: 20px; font-weight: 800; color: #f1f5f9; margin-bottom: 4px; margin-top: 16px; }
+.accuracy-sub { font-size: 13px; color: #64748b; }
+.verdict-banner { border: 2px solid; border-radius: 20px; padding: 24px 28px; margin-bottom: 24px; text-align: center; }
+.verdict-title { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+.verdict-sub { font-size: 15px; color: #94a3b8; line-height: 1.6; margin-bottom: 20px; }
+.score-circles { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.score-circle { width: 88px; height: 88px; border: 4px solid; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.score-num { font-size: 26px; font-weight: 900; line-height: 1; }
+.score-lbl { font-size: 10px; color: #64748b; }
+.rounds-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+.round-card { background: #0d1726; border-radius: 14px; padding: 18px; border: 1px solid #1e2d45; text-align: center; }
+.round-card.passed { border-color: #10b981; }
+.round-card.failed { border-color: #ef4444; }
+.round-card.not-reached { opacity: 0.4; }
+.round-num { font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: 600; }
+.round-score { font-size: 32px; font-weight: 900; margin-bottom: 6px; }
+.round-status { font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 10px; }
+.tracker-section { background: #0d1726; border-radius: 16px; padding: 24px; border: 1px solid #1e2d45; margin-bottom: 24px; }
+.tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.tracker-title { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+.round-label { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 10px; margin-top: 14px; }
+.q-circles-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.q-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #fff; position: relative; cursor: pointer; transition: transform 0.2s; }
+.q-circle:hover { transform: scale(1.1); }
+.q-circle.passed { background: #10b981; }
+.q-circle.failed { background: #ef4444; }
+.q-circle.skipped { background: #475569; }
+.q-circle .q-score { font-size: 9px; font-weight: 600; margin-top: 1px; }
+.q-tooltip { display: none; position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%); background: #1e2d45; border: 1px solid #334155; border-radius: 8px; padding: 8px 12px; font-size: 11px; white-space: nowrap; z-index: 10; color: #e2e8f0; min-width: 160px; }
+.q-circle:hover .q-tooltip { display: block; }
+.breakdown { margin-bottom: 24px; }
+.breakdown-title { font-size: 16px; font-weight: 800; color: #f1f5f9; margin-bottom: 14px; }
+.q-breakdown-card { background: #0d1726; border-radius: 12px; padding: 14px; border: 1px solid #1e2d45; margin-bottom: 10px; }
+.q-breakdown-card.passed { border-left: 4px solid #10b981; }
+.q-breakdown-card.failed { border-left: 4px solid #ef4444; }
+.qb-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; }
+.qb-q { font-size: 13px; font-weight: 700; color: #f1f5f9; flex: 1; }
+.qb-score { font-size: 13px; font-weight: 800; flex-shrink: 0; }
+.qb-answer { font-size: 13px; color: #94a3b8; font-style: italic; margin-bottom: 6px; }
+.qb-feedback { font-size: 12px; color: #64748b; background: #080f1e; padding: 8px 10px; border-radius: 6px; }
+.tips-card { background: #0d1726; border-radius: 14px; padding: 20px; border: 1px solid #1e2d45; margin-bottom: 24px; }
+.tips-title { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 12px; }
+.tip-item { font-size: 13px; color: #94a3b8; padding: 6px 0; border-bottom: 1px solid #0f172a; line-height: 1.6; }
+.tip-item:last-child { border-bottom: none; }
+.action-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.action-btn { flex: 1; padding: 13px; border: none; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; min-width: 120px; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="brand">InterviewAI</div>
+  <div class="nav-right">
+    <a href="/dashboard" class="nav-btn">Dashboard</a>
+    <a href="/choose" class="nav-btn primary">Practice Again</a>
+    <a href="/logout" class="nav-btn">Logout</a>
+  </div>
+</nav>
+
+<div class="page" id="page">
+  <div style="text-align:center;padding:60px 20px">
+    <div style="font-size:32px;margin-bottom:12px">Loading</div>
+    <div style="font-size:16px;color:#64748b">Loading your results...</div>
+  </div>
+</div>
+
+<script>
+const data = JSON.parse(sessionStorage.getItem('interviewResult') || 'null');
+
+const CAT_META = {
+  hr: { label: "HR Round", color: "#10b981", emoji: "HR" },
+  tech: { label: "Technical", color: "#6366f1", emoji: "Tech" },
+  data: { label: "Data/Analytics", color: "#f59e0b", emoji: "Data" }
+};
+
+const ROUND_NAMES = { 1: "Round 1 - Basic", 2: "Round 2 - Intermediate", 3: "Round 3 - Advanced" };
+
+if (!data) {
+  document.getElementById('page').innerHTML = `
+    <div style="text-align:center;padding:60px 20px">
+      <div style="font-size:48px;margin-bottom:16px">No Results</div>
+      <h2 style="color:#f1f5f9;margin-bottom:10px">No Results Found</h2>
+      <p style="color:#64748b;margin-bottom:24px">Please complete an interview first.</p>
+      <a href="/choose" style="padding:14px 28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:12px;color:#fff;font-weight:800;text-decoration:none">Start Interview</a>
+    </div>`;
+} else {
+  renderResults(data);
+}
+
+function renderResults(d) {
+  const cm = CAT_META[d.category] || CAT_META.hr;
+  const score = d.overall_score;
+  const eliminated = d.eliminated_at !== null && d.eliminated_at !== undefined;
+  const roundsCompleted = d.rounds_completed;
+
+  const vm = score >= 75
+    ? { title: "You are Ready to Proceed!", sub: "Outstanding performance! You showed strong answers and excellent composure.", color: "#10b981", bg: "#052e16" }
+    : score >= 50
+    ? { title: "Good Effort - Keep Practicing!", sub: "You showed potential but need more consistency. A few more sessions and you will be ready.", color: "#f59e0b", bg: "#1c1002" }
+    : { title: "More Practice Needed", sub: "Focus on keyword-rich answers and maintaining a calm expression.", color: "#ef4444", bg: "#1c0505" };
+
+  const byRound = {};
+  (d.question_results || []).forEach(q => {
+    const r = q.round || 1;
+    if (!byRound[r]) byRound[r] = [];
+    byRound[r].push(q);
+  });
+
+  const roundScores = d.round_scores || [];
+
+  const html = `
+  <div style="display:flex;justify-content:center;margin-bottom:20px">
+    <span style="padding:5px 16px;background:${cm.color}18;border:1px solid ${cm.color}55;border-radius:20px;font-size:13px;color:${cm.color};font-weight:700">
+      ${cm.emoji} ${cm.label} Interview ${eliminated ? '- Eliminated at Round ' + d.eliminated_at : '- All Rounds Completed'}
+    </span>
+  </div>
+
+  <div class="accuracy-section">
+    <div class="accuracy-label">Overall Accuracy</div>
+    <div class="accuracy-bar-wrap">
+      <div class="accuracy-bar-bg"></div>
+      <div class="accuracy-bar-fill" id="acc-fill" style="width:0%"></div>
+      <div class="accuracy-marker" id="acc-marker" style="left:calc(0% - 24px)">${score}%</div>
+    </div>
+    <div class="accuracy-scale">
+      <span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>40%</span>
+      <span>50%</span><span>60%</span><span>70%</span><span>80%</span><span>90%</span><span>100%</span>
+    </div>
+    <div class="accuracy-msg">${score >= 75 ? 'Excellent performance!' : score >= 50 ? 'Practice makes perfect!' : 'Keep practicing!'}</div>
+    <div class="accuracy-sub">${score >= 60 ? 'You showed strong understanding. Keep it up!' : 'Review the questions you missed and practice more.'}</div>
+  </div>
+
+  <div class="verdict-banner" style="background:${vm.bg};border-color:${vm.color}">
+    <div class="verdict-title" style="color:${vm.color}">${vm.title}</div>
+    <div class="verdict-sub">${vm.sub}</div>
+    <div class="score-circles">
+      <div class="score-circle" style="border-color:${vm.color}">
+        <span class="score-num" style="color:${vm.color}">${score}</span>
+        <span class="score-lbl">Overall</span>
+      </div>
+      <div class="score-circle" style="border-color:#6366f1">
+        <span class="score-num" style="color:#6366f1">${roundsCompleted}</span>
+        <span class="score-lbl">Rounds Done</span>
+      </div>
+      <div class="score-circle" style="border-color:#f59e0b">
+        <span class="score-num" style="color:#f59e0b">${(d.question_results||[]).filter(q=>q.passed).length}</span>
+        <span class="score-lbl">Qs Passed</span>
+      </div>
+      <div class="score-circle" style="border-color:#ef4444">
+        <span class="score-num" style="color:#ef4444">${(d.question_results||[]).filter(q=>!q.passed).length}</span>
+        <span class="score-lbl">Qs Failed</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounds-section">
+    ${[1,2,3].map(r => {
+      const rs = roundScores.find(x => x.round === r);
+      const reached = rs !== undefined;
+      const cls = !reached ? 'not-reached' : rs.passed ? 'passed' : 'failed';
+      const color = !reached ? '#475569' : rs.passed ? '#10b981' : '#ef4444';
+      const statusText = !reached ? 'Not Reached' : rs.passed ? 'Passed' : 'Failed';
+      const statusBg = !reached ? '#1e2d45' : rs.passed ? '#10b98122' : '#ef444422';
+      return `<div class="round-card ${cls}">
+        <div class="round-num">${ROUND_NAMES[r]}</div>
+        <div class="round-score" style="color:${color}">${reached ? rs.score : '--'}<span style="font-size:14px;color:#64748b">${reached ? '/100' : ''}</span></div>
+        <span class="round-status" style="color:${color};background:${statusBg}">${statusText}</span>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="tracker-section">
+    <div class="tracker-header">
+      <div class="tracker-title">Question Performance Tracker</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Passed (60%+)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Failed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#475569"></div>Not Attempted</div>
+      </div>
+    </div>
+    ${Object.entries(byRound).map(([r, qs]) => `
+      <div class="round-label">${ROUND_NAMES[r] || 'Round ' + r}</div>
+      <div class="q-circles-row">
+        ${qs.map((q, i) => `
+          <div class="q-circle ${q.passed ? 'passed' : 'failed'}">
+            Q${i+1}
+            <div class="q-score">${q.score}%</div>
+            <div class="q-tooltip">
+              <strong>Q${i+1}: ${q.question.substring(0,40)}...</strong><br>
+              Score: ${q.score}/100 · ${q.passed ? 'Passed' : 'Failed'}<br>
+              Emotion: ${q.emotion || 'neutral'}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="breakdown">
+    <div class="breakdown-title">Question-by-Question Breakdown</div>
+    ${(d.question_results||[]).map((q, i) => `
+      <div class="q-breakdown-card ${q.passed ? 'passed' : 'failed'}">
+        <div class="qb-top">
+          <div class="qb-q">Q${i+1} (Round ${q.round}): ${q.question}</div>
+          <div class="qb-score" style="color:${q.passed ? '#10b981' : '#ef4444'}">${q.score}/100</div>
+        </div>
+        ${q.answer ? `<div class="qb-answer">"${q.answer.substring(0, 120)}${q.answer.length > 120 ? '...' : ''}"</div>` : '<div class="qb-answer" style="color:#475569">No answer recorded</div>'}
+        <div class="qb-feedback">Feedback: ${q.feedback}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="tips-card">
+    <div class="tips-title">Personalised Improvement Plan</div>
+    ${score >= 75 ? `
+      <div class="tip-item">Continue maintaining your positive body language and confident expression</div>
+      <div class="tip-item">Practice answering technical questions specific to your field</div>
+      <div class="tip-item">Research the company thoroughly before the actual interview</div>
+      <div class="tip-item">Prepare 2-3 questions to ask the interviewer</div>
+    ` : score >= 50 ? `
+      <div class="tip-item">Work on using more specific keywords and terminology in your answers</div>
+      <div class="tip-item">Structure answers using STAR method</div>
+      <div class="tip-item">Practice in front of a mirror for 10 minutes daily</div>
+      <div class="tip-item">Focus on the questions you failed and review ideal answers</div>
+    ` : `
+      <div class="tip-item">Focus on learning key terminology for your interview category</div>
+      <div class="tip-item">Practice deep breathing before answering each question</div>
+      <div class="tip-item">Study common interview questions and prepare structured answers</div>
+      <div class="tip-item">Start with Round 1 questions and master basics before moving to advanced</div>
+      <div class="tip-item">Record yourself and review your answer structure</div>
+    `}
+  </div>
+
+  <div class="action-btns">
+    <button class="action-btn" style="background:#1e2d45" onclick="window.location.href='/dashboard'">View Analytics</button>
+    <button class="action-btn" style="background:#1e2d45" onclick="downloadReport()">Download Report</button>
+    <button class="action-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)" onclick="window.location.href='/choose'">Practice Again</button>
+  </div>
+  `;
+
+  document.getElementById('page').innerHTML = html;
+
+  setTimeout(() => {
+    const fill = document.getElementById('acc-fill');
+    const marker = document.getElementById('acc-marker');
+    if (fill && marker) {
+      fill.style.width = score + "%";
+      marker.style.left = `calc(${score}% - 24px)`;
+    }
+  }, 300);
+}
+
+function downloadReport() {
+  if (!data) return;
+  const lines = [
+    "INTERVIEWAI SESSION REPORT",
+    "Date: " + new Date().toLocaleDateString("en-IN"),
+    "Category: " + (CAT_META[data.category]?.label || data.category),
+    "Overall Score: " + data.overall_score + "/100",
+    "Rounds Completed: " + data.rounds_completed + "/3",
+    "Verdict: " + data.verdict.toUpperCase(),
+    "",
+    "=== ROUND SCORES ===",
+    ...(data.round_scores||[]).map(r => "Round " + r.round + ": " + r.score + "/100 - " + (r.passed ? "PASSED" : "FAILED")),
+    "",
+    "=== QUESTION BREAKDOWN ===",
+    ...(data.question_results||[]).map((q,i) =>
+      "Q"+(i+1)+" (Round "+q.round+"): "+q.question+
+      "\nAnswer: "+(q.answer||"None")+
+      "\nScore: "+q.score+"/100 - "+(q.passed?"PASSED":"FAILED")+
+      "\nFeedback: "+q.feedback+"\n"
+    )
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "interview_report.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
